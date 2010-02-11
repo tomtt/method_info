@@ -1,4 +1,3 @@
-
 module MethodInfoMethod
   def method_info
     MethodInfo.new(self)
@@ -45,5 +44,37 @@ class MethodInfo
     rescue NoMethodError
       raise e
     end
+  end
+
+  def method_map
+    @method_map = Hash.new
+    current_ancestors = ancestors
+    @method_map['__ancestors'] = current_ancestors
+    current_ancestors.each do |ancestor|
+      @method_map[ancestor] = []
+    end
+
+    @object.methods.each do |method|
+      @method_map[method_owner(method)] << method
+    end
+    @method_map
+  end
+
+  def to_s
+    map = method_map
+
+    result = ""
+    map['__ancestors'].each do |ancestor|
+      break if ancestor == Object
+      next if map[ancestor].empty?
+      result +=
+        "=== #{ancestor} ===\n" +
+        map[ancestor].sort.join(", ") +
+        "\n"
+    end
+    index_of_object = map['__ancestors'].index(Object)
+    result +=
+      "=== #{map['__ancestors'][index_of_object..-1].join(", ")} ==="
+    result
   end
 end
