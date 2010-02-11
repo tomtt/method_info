@@ -6,7 +6,7 @@ begin
   Jeweler::Tasks.new do |gem|
     gem.name = "method_info"
     gem.summary = %Q{Get info about an object's methods}
-    gem.description = %Q{TODO: longer description of your gem}
+    gem.description = %Q{Defines a method_info method on every Object instance which provides information about methods that are defined on the object and the location where they were defined}
     gem.email = "method_info@tomtenthij.nl"
     gem.homepage = "http://github.com/tomtt/method_info"
     gem.authors = ["Tom ten Thij"]
