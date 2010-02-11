@@ -1,6 +1,15 @@
 = method_info
 
-Description goes here.
+Provides info about methods that can be called on an object and where they are defined.
+
+Usage:
+
+>> require 'method_info'
+=> true
+>> "abc".method_info.ancestors
+=> [String, Enumerable, Comparable, Object, MethodInfoMethod, Kernel]
+>> "abc".method_info.method_owner(:==)
+=> String 
 
 == Note on Patches/Pull Requests
  
