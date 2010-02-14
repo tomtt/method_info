@@ -9,6 +9,8 @@ module MethodInfo
         @obj.stub!(:puts)
       end
 
+      it "should have more specs"
+
       it "creates an AncestorList object for the object it was called on" do
         AncestorList.should_receive(:build).with(@obj, anything)
         @obj.method_info
@@ -51,10 +53,10 @@ module MethodInfo
         @obj.method_info(:print => true)
       end
 
-      it "returns the created ancestor list" do
+      it "returns nil" do
         mock_ancestor_list = mock("ancestor list")
         AncestorList.stub!(:build).and_return(mock_ancestor_list)
-        @obj.method_info.should == mock_ancestor_list
+        @obj.method_info.should == nil
       end
 
     end

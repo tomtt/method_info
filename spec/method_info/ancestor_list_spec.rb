@@ -3,7 +3,13 @@ require 'method_info/ancestor_list'
 
 module MethodInfo
   describe AncestorList do
+    describe "class" do
+      it "should have specs"
+    end
+
     describe "AncestorList::build" do
+      it "should print the methods on an object" do
+      end
     end
 
     describe "process options" do
@@ -52,6 +58,16 @@ module MethodInfo
         parsed_options[:ancestors_to_exclude].should == []
       end
 
+      it "uses the value passed in for the :ancestors_to_exclude option" do
+        parsed_options = AncestorList.send(:process_options, :ancestors_to_exclude => [Object])
+        parsed_options[:ancestors_to_exclude].should == [Object]
+      end
+
+      it "uses the default value ([]) if no :ancestors_to_exclude option was passed" do
+        parsed_options = AncestorList.send(:process_options)
+        parsed_options[:ancestors_to_exclude].should == []
+      end
+
       it "uses the value passed in for the :method_missing option" do
         parsed_options = AncestorList.send(:process_options, :method_missing => true)
         parsed_options[:method_missing].should == true
@@ -70,6 +86,16 @@ module MethodInfo
       it "uses the default value (true) if no :public_methods option was passed" do
         parsed_options = AncestorList.send(:process_options)
         parsed_options[:public_methods].should == true
+      end
+
+      it "uses the value passed in for the :singleton_methods option" do
+        parsed_options = AncestorList.send(:process_options, :singleton_methods => false)
+        parsed_options[:singleton_methods].should == false
+      end
+
+      it "uses the default value (true) if no :singleton_methods option was passed" do
+        parsed_options = AncestorList.send(:process_options)
+        parsed_options[:singleton_methods].should == true
       end
 
       it "uses the value passed in for the :protected_methods option" do
@@ -102,14 +128,24 @@ module MethodInfo
         parsed_options[:include_name_of_excluded_ancestors].should == true
       end
 
+      it "uses the value passed in for the :include_name_of_methodless_ancestors option" do
+        parsed_options = AncestorList.send(:process_options, :include_name_of_methodless_ancestors => false)
+        parsed_options[:include_name_of_methodless_ancestors].should == false
+      end
+
+      it "uses the default value (true) if no :include_name_of_methodless_ancestors option was passed" do
+        parsed_options = AncestorList.send(:process_options)
+        parsed_options[:include_name_of_methodless_ancestors].should == true
+      end
+
       it "uses the value passed in for the :format option" do
         parsed_options = AncestorList.send(:process_options, :format => :yaml)
         parsed_options[:format].should == :yaml
       end
 
-      it "uses the default value (:string) if no :format option was passed" do
+      it "uses the default value (nil) if no :format option was passed" do
         parsed_options = AncestorList.send(:process_options)
-        parsed_options[:format].should == :string
+        parsed_options[:format].should == nil
       end
     end
   end

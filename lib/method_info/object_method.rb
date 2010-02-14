@@ -10,7 +10,14 @@ module MethodInfo
       do_print = !options.has_key?(:print) || options.delete(:print)
       ancestor_list = AncestorList.build(self, options)
       puts ancestor_list if do_print
-      ancestor_list
+      format = options[:format]
+      if format
+        if format == :string
+          ancestor_list.to_s
+        else
+          ancestor_list.to_a
+        end
+      end
     end
   end
 end
