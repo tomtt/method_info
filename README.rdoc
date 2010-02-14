@@ -1,15 +1,14 @@
 = method_info
 
-Provides info about methods that can be called on an object and where they are defined.
+Defines a method_info method on every Object which will show the methods that each of the object's ancestors has defined on it. The default settings are chosen to cause the least amount of surprise. This means the output may be a bit verbose, but there are options that can to narrow down the output to what you are interested in. The following options are provided:
+TODO: describe options to method_info
 
 Usage:
 
 >> require 'method_info'
 => true
->> "abc".method_info.ancestors
-=> [String, Enumerable, Comparable, Object, MethodInfoMethod, Kernel]
->> "abc".method_info.method_owner(:==)
-=> String 
+>> "abc".method_info
+TODO: include usage examples
 
 == Note on Patches/Pull Requests
  
