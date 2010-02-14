@@ -4,6 +4,7 @@ require 'method_info'
 require 'spec'
 require 'spec/autorun'
 
+require 'ruby-debug'
+
 Spec::Runner.configure do |config|
-  
 end
