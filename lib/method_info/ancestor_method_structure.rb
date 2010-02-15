@@ -1,5 +1,5 @@
 module MethodInfo
-  class AncestorList
+  class AncestorMethodStructure
     # :ancestors_to_show (default: []) (Overrules the hiding of any ancestors as specified by the :ancestors_to_exclude option)
     # :ancestors_to_exclude (default: []) (If a class is excluded, all modules included under it are excluded as well, an ancestor specified in :ancestors_to_show will be shown regardless of the this value)
     # :method (default: nil) More detailed info about one method
@@ -11,18 +11,17 @@ module MethodInfo
     # :include_name_of_excluded_ancestors (default: true)
     # :format (default: nil)
     def self.build(object, options)
-      processed_options = process_options(options)
       methods = []
-      methods += object.methods if processed_options[:public_methods]
-      methods += object.protected_methods if processed_options[:protected_methods]
-      methods += object.private_methods if processed_options[:private_methods]
-      methods -= object.singleton_methods unless processed_options[:singleton_methods]
-      ancestor_list = AncestorList.new(object, processed_options)
+      methods += object.methods if options[:public_methods]
+      methods += object.protected_methods if options[:protected_methods]
+      methods += object.private_methods if options[:private_methods]
+      methods -= object.singleton_methods unless options[:singleton_methods]
+      ancestor_method_structure = AncestorMethodStructure.new(object, options)
 
       methods.each do |method|
-        ancestor_list.add_method_to_ancestor(method, method_owner(object, method))
+        ancestor_method_structure.add_method_to_ancestor(method, method_owner(object, method))
       end
-      ancestor_list
+      ancestor_method_structure
     end
 
     def initialize(object, options)
@@ -101,26 +100,5 @@ module MethodInfo
       object.method(method).owner
     end
 
-    def self.process_options(options = {})
-      defaults = {
-        :ancestors_to_show => [],
-        :ancestors_to_exclude => [],
-        :format => nil,
-        :include_name_of_excluded_ancestors => true,
-        :include_name_of_methodless_ancestors => true,
-        :method => nil,
-        :method_missing => false,
-        :private_methods => false,
-        :protected_methods => false,
-        :singleton_methods => true,
-        :public_methods => true
-      }
-      unknown_options = options.keys - defaults.keys
-      if unknown_options.empty?
-        defaults.merge(options)
-      else
-        raise ArgumentError.new("Unsupported options: " + unknown_options.map { |k| k.to_s }.sort.join(', '))
-      end
-    end
   end
 end

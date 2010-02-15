@@ -16,6 +16,42 @@ module MethodInfo
     end
 
     describe "handle" do
+      describe "processing options" do
+        it "raises an argument error when an unsupported option is passed" do
+          lambda { MethodInfo::OptionHandler.handle(:object, :unknown_option => :one) }.
+            should raise_error(ArgumentError)
+        end
+
+        it "raises an error mentioning any unsupported options, ordered alphabetically" do
+          lambda { MethodInfo::OptionHandler.handle(:object, :unknown_option => :one, :another => :two) }.
+            should raise_error(ArgumentError, "Unsupported options: another, unknown_option")
+        end
+
+        it "uses a value from the default profile if an option was not passed" do
+          MethodInfo::OptionHandler.stub!(:default_profile).and_return({ :mock_option, :mock_value })
+          AncestorMethodStructure.should_receive(:build).with(anything, hash_including(:mock_option => :mock_value))
+          MethodInfo::OptionHandler.handle(:object)
+        end
+        it "uses a value for an option if it was passed in" do
+          MethodInfo::OptionHandler.stub!(:default_profile).and_return({ :mock_option, :mock_value })
+          AncestorMethodStructure.should_receive(:build).with(anything, hash_including(:mock_option => :passed_value))
+          MethodInfo::OptionHandler.handle(:object, :mock_option => :passed_value)
+        end
+
+        it "has the correct default values for options" do
+          default_options = MethodInfo::OptionHandler.default_profile
+          default_options[:format].should == nil
+          default_options[:ancestors_to_show].should == []
+          default_options[:ancestors_to_exclude].should == []
+          default_options[:include_name_of_excluded_ancestors].should == true
+          default_options[:include_name_of_methodless_ancestors].should == true
+          default_options[:public_methods].should == true
+          default_options[:singleton_methods].should == true
+          default_options[:protected_methods].should == false
+          default_options[:private_methods].should == false
+        end
+      end
+
       it "builds an ancestor method structure with the object" do
         mock_object = mock('object')
         AncestorMethodStructure.should_receive(:build).with(mock_object, anything)
@@ -23,12 +59,12 @@ module MethodInfo
       end
 
       it "passes through regular options when building an ancestor method structure" do
-        AncestorMethodStructure.should_receive(:build).with(anything, { :some_key => :some_value })
-        MethodInfo::OptionHandler.handle(:foo, { :some_key => :some_value })
+        AncestorMethodStructure.should_receive(:build).with(anything, hash_including(:private_methods => :some_value))
+        MethodInfo::OptionHandler.handle(:foo, { :private_methods => :some_value })
       end
 
       it "does not pass the :format option when building an ancestor method structure" do
-        AncestorMethodStructure.should_receive(:build).with(anything, { })
+        AncestorMethodStructure.should_receive(:build).with(anything, hash_not_including(:format))
         MethodInfo::OptionHandler.handle(:foo, { :format => :string })
       end
 
