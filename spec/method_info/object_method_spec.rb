@@ -4,61 +4,16 @@ require 'method_info/object_method'
 module MethodInfo
   module ObjectMethod
     describe "method_info" do
-      before do
+      it "passes the object it was called on to the option handler" do
         @obj = Object.new
-        @obj.stub!(:puts)
-      end
-
-      it "should have more specs"
-
-      it "creates an AncestorList object for the object it was called on" do
-        AncestorList.should_receive(:build).with(@obj, anything)
+        OptionHandler.should_receive(:handle).with(@obj, anything)
         @obj.method_info
       end
 
-      it "creates an AncestorList object with no options if none are specified" do
-        AncestorList.should_receive(:build).with(anything, {})
-        @obj.method_info(options)
+      it "passes its options to the option handler" do
+        OptionHandler.should_receive(:handle).with(anything, { :a => :one, :b => :two })
+        Object.method_info(:a => :one, :b => :two)
       end
-
-      it "creates an AncestorList object with the options passed to it" do
-        options = { :ancestors_to_exclude => [Object] }
-        AncestorList.should_receive(:build).with(anything, options)
-        @obj.method_info(options)
-      end
-
-      it "prints the ancestor list if the :print option is passed and true" do
-        mock_ancestor_list = mock("ancestor list")
-        AncestorList.stub!(:build).and_return(mock_ancestor_list)
-        @obj.should_receive(:puts).with(mock_ancestor_list)
-        @obj.method_info(:print => true)
-      end
-
-      it "does not print the ancestor list if the :print option is passed and false" do
-        mock_ancestor_list = mock("ancestor list")
-        AncestorList.stub!(:build).and_return(mock_ancestor_list)
-        @obj.should_not_receive(:puts).with(mock_ancestor_list)
-        @obj.method_info(:print => nil)
-      end
-
-      it "prints the ancestor list if the :print option is not passed" do
-        mock_ancestor_list = mock("ancestor list")
-        AncestorList.stub!(:build).and_return(mock_ancestor_list)
-        @obj.should_receive(:puts).with(mock_ancestor_list)
-        @obj.method_info
-      end
-
-      it "does not pass the :print option when creating the AncestorList" do
-        AncestorList.should_receive(:build).with(anything, hash_not_including(:print))
-        @obj.method_info(:print => true)
-      end
-
-      it "returns nil" do
-        mock_ancestor_list = mock("ancestor list")
-        AncestorList.stub!(:build).and_return(mock_ancestor_list)
-        @obj.method_info.should == nil
-      end
-
     end
   end
 end

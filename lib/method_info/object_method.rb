@@ -1,23 +1,26 @@
-require 'method_info/ancestor_list'
+require 'method_info/option_handler'
 
 module MethodInfo
   module ObjectMethod
     # Provides information about an object's methods.
     # Options:
-    # :print (default: true)
-    # Any other options are passed to the AncestorList::build method
+    # :format (default: nil)
+    # - :string returns a string representation
+    # - :array returns an array representation
+    # - anything else prints out a string representation
+    # :ancestors_to_show (default: []) (Overrules the hiding of any ancestors as specified
+    #                    by the :ancestors_to_exclude option)
+    # :ancestors_to_exclude (default: []) (If a class is excluded, all modules included
+    #                       under it are excluded as well, an ancestor specified in
+    #                       :ancestors_to_show will be shown regardless of the this value)
+    # :method_missing (default: false)
+    # :public_methods (default: true)
+    # :protected_methods (default: false)
+    # :private_methods (default: false)
+    # :singleton_methods (default: true)
+    # :include_name_of_excluded_ancestors (default: true)
     def method_info(options = {})
-      do_print = !options.has_key?(:print) || options.delete(:print)
-      ancestor_list = AncestorList.build(self, options)
-      puts ancestor_list if do_print
-      format = options[:format]
-      if format
-        if format == :string
-          ancestor_list.to_s
-        else
-          ancestor_list.to_a
-        end
-      end
+      OptionHandler.handle(self, options)
     end
   end
 end
