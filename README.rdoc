@@ -1,14 +1,46 @@
 = method_info
 
 Defines a method_info method on every Object which will show the methods that each of the object's ancestors has defined on it. The default settings are chosen to cause the least amount of surprise. This means the output may be a bit verbose, but there are options that can to narrow down the output to what you are interested in. The following options are provided:
-TODO: describe options to method_info
 
-Usage:
+* :format (default: nil)
+  - :string returns a string representation
+  - :array returns an array representation
+  - anything else prints out a string representation
+* :ancestors_to_show (default: []) (Overrules the hiding of any ancestors as specified
+    by the :ancestors_to_exclude option)
+* :ancestors_to_exclude (default: []) (If a class is excluded, all modules included
+    under it are excluded as well, an ancestor specified in :ancestors_to_show will be
+    shown regardless of the this value)
+* :method_missing (default: false)
+* :public_methods (default: true)
+* :protected_methods (default: false)
+* :private_methods (default: false)
+* :singleton_methods (default: true)
+* :include_name_of_excluded_ancestors (default: true)
 
->> require 'method_info'
-=> true
->> "abc".method_info
-TODO: include usage examples
+Examples:
+
+  >> require 'method_info'
+  => true
+  >> "abc".method_info
+  ::: String :::
+  %, *, +, <<, <=>, ==, =~, [], []=, bytes, bytesize, capitalize, capitalize!, casecmp, center, chars, chomp, chomp!, chop, chop!, concat, count, crypt, delete, delete!, downcase, downcase!, dump, each, each_byte, each_char, each_line, empty?, end_with?, eql?, gsub, gsub!, hash, hex, include?, index, insert, inspect, intern, is_binary_data?, is_complex_yaml?, length, lines, ljust, lstrip, lstrip!, match, next, next!, oct, partition, replace, reverse, reverse!, rindex, rjust, rpartition, rstrip, rstrip!, scan, size, slice, slice!, split, squeeze, squeeze!, start_with?, strip, strip!, sub, sub!, succ, succ!, sum, swapcase, swapcase!, taguri, taguri=, to_f, to_i, to_s, to_str, to_sym, to_yaml, tr, tr!, tr_s, tr_s!, unpack, upcase, upcase!, upto
+  ::: Enumerable :::
+  all?, any?, collect, cycle, detect, drop, drop_while, each_cons, each_slice, each_with_index, entries, enum_cons, enum_slice, enum_with_index, find, find_all, find_index, first, grep, group_by, inject, map, max, max_by, member?, min, min_by, minmax, minmax_by, none?, one?, reduce, reject, reverse_each, select, sort, sort_by, take, take_while, to_a, zip
+  ::: Comparable :::
+  <, <=, >, >=, between?
+  ::: Object :::
+  to_yaml_properties, to_yaml_style
+  ::: MethodInfo::ObjectMethod :::
+  method_info
+  ::: Kernel :::
+  ===, __id__, __send__, class, clone, display, dup, enum_for, equal?, extend, freeze, frozen?, id, instance_eval, instance_exec, instance_of?, instance_variable_defined?, instance_variable_get, instance_variable_set, instance_variables, is_a?, kind_of?, method, methods, nil?, object_id, private_methods, protected_methods, public_methods, respond_to?, send, singleton_methods, taint, tainted?, tap, to_enum, type, untaint
+  Methodless: #<Class:#<String:0x13fd42c>>
+  => nil
+  ::: Symbol :::
+  ===, id2name, inspect, taguri, taguri=, to_i, to_int, to_proc, to_s, to_sym, to_yaml
+  Excluded: Object, MethodInfo::ObjectMethod, Kernel
+  => nil
 
 == Note on Patches/Pull Requests
  
