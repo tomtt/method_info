@@ -43,12 +43,13 @@ module MethodInfo
           default_options[:format].should == nil
           default_options[:ancestors_to_show].should == []
           default_options[:ancestors_to_exclude].should == []
-          default_options[:include_name_of_excluded_ancestors].should == true
-          default_options[:include_name_of_methodless_ancestors].should == true
+          default_options[:include_names_of_excluded_ancestors].should == true
+          default_options[:include_names_of_methodless_ancestors].should == true
           default_options[:public_methods].should == true
           default_options[:singleton_methods].should == true
           default_options[:protected_methods].should == false
           default_options[:private_methods].should == false
+          default_options[:enable_colors].should == false
         end
       end
 

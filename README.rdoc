@@ -16,8 +16,13 @@ Defines a method_info method on every Object which will show the methods that ea
 * :protected_methods (default: false)
 * :private_methods (default: false)
 * :singleton_methods (default: true)
-* :include_name_of_excluded_ancestors (default: true)
+* :include_names_of_excluded_ancestors (default: true)
+* :include_names_of_methodless_ancestors (default: true)
 * :enable_colors (default: false)
+* :class_color Set colour for a line printing out a class (only used when :enable_colors is true)
+* :module_color Set colour for a line printing out a module (only used when :enable_colors is true)
+* :message_color Set colour for a line with a message (only used when :enable_colors is true)
+* :methods_color Set colour for a line with methods (only used when :enable_colors is true)
 
 You can set default options which will override the inbuild defaults. Here is an example which
 will hide the methods defined on all instances of Object and show colour in the output (this

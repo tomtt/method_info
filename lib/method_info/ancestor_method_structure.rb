@@ -64,29 +64,34 @@ module MethodInfo
       if @options[:enable_colors]
         require 'term/ansicolor'
 
-        class_color = Term::ANSIColor.yellow
-        module_color = Term::ANSIColor.red
-        message_color = Term::ANSIColor.green
-        reset_color = Term::ANSIColor.white
+        class_color = @options[:color_class] || Term::ANSIColor.yellow
+        module_color = @options[:color_module] || Term::ANSIColor.red
+        message_color = @options[:color_message] || Term::ANSIColor.green
+        methods_color = @options[:color_methods] || Term::ANSIColor.reset
+        punctuation_color = @options[:color_punctuation] || Term::ANSIColor.reset
+        reset_color = Term::ANSIColor.reset
       else
         class_color = ""
         module_color = ""
         message_color = ""
+        methods_color = ""
         reset_color = ""
+        punctuation_color = ""
       end
 
       s = ancestors_with_methods.map do |ancestor|
         "%s::: %s :::\n%s%s\n" % [ancestor.is_a?(Class) ? class_color : module_color,
                                   ancestor.to_s,
-                                  reset_color,
-                                  @ancestor_methods[ancestor].sort.join(', ')]
+                                  methods_color,
+                                  @ancestor_methods[ancestor].sort.join("#{punctuation_color}, #{methods_color}")]
       end.join('')
-      if @options[:include_name_of_methodless_ancestors] && ! methodless_ancestors.empty?
+      if @options[:include_names_of_methodless_ancestors] && ! methodless_ancestors.empty?
         s += "#{message_color}Methodless:#{reset_color} " + methodless_ancestors.join(', ') + "\n"
       end
-      if @options[:include_name_of_excluded_ancestors] && ! @ancestor_filter.excluded.empty?
+      if @options[:include_names_of_excluded_ancestors] && ! @ancestor_filter.excluded.empty?
         s += "#{message_color}Excluded:#{reset_color} " + @ancestor_filter.excluded.join(', ') + "\n"
       end
+      s += reset_color
       s
     end
 
