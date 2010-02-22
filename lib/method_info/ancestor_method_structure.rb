@@ -50,7 +50,7 @@ module MethodInfo
     end
 
     def add_method_to_ancestor(method)
-      ancestor = AncestorMethodStructure.method_owner(@object, method)
+      ancestor = method_owner(method)
       if @ancestors.include?(ancestor)
         @ancestor_methods[ancestor] << method
       end
@@ -101,12 +101,34 @@ module MethodInfo
     end
 
     # Returns the class or module where method is defined
-    def self.method_owner(object, method)
-      # Printing this warning is not spec'ed: it is only here temporarily until the 1.8.6
-      # workaround is implemented
-      STDERR.puts "Ruby >= 1.8.7 required" unless VERSION >= '1.8.7'
-      object.method(method).owner
+    def method_owner(method_symbol)
+      method = @object.method(method_symbol)
+      method.owner
+    rescue
+      poor_mans_method_owner(method, method_symbol.to_s)
     end
 
+    # Ruby 1.8.6 has no Method#owner method, this is a poor man's replacement. It has horrible
+    # performance and may break for other ruby implementations than MRI.
+    def poor_mans_method_owner(method, method_name)
+      # A Method object has no :owner method, but we can infer it's owner from the result of it's
+      # :to_s method. Examples:
+      # 37.method(:rdiv).to_s => "#<Method: Fixnum#rdiv>"
+      # 37.method(:ceil).to_s => "#<Method: Fixnum(Integer)#ceil>"
+      # 37.method(:prec).to_s => "#<Method: Fixnum(Precision)#prec>"
+      # obj.method(:singleton_method).to_s => "#<Method: #<Object:0x5673b8>.singleton_method>"
+      if method.to_s =~ /^#<Method: (.*)[#.]#{Regexp.escape(method_name)}>$/
+        owner_string = $1
+        # Maybe it is a top level class and we're done
+        if owner_string =~ /\w+\((\w+)\)/
+          # Module or subclass (like 'Fixnum(Integer)')
+          owner_string = $1
+        elsif owner_string.include?("#<Object:")
+          # probably the eigen class
+          owner_string = "#<Class:#{owner_string}>"
+        end
+        @ancestors.select { |a| a.to_s == owner_string }.first
+      end
+    end
   end
 end
