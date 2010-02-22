@@ -102,6 +102,9 @@ module MethodInfo
 
     # Returns the class or module where method is defined
     def self.method_owner(object, method)
+      # Printing this warning is not spec'ed: it is only here temporarily until the 1.8.6
+      # workaround is implemented
+      STDERR.puts "Ruby >= 1.8.7 required" unless VERSION >= '1.8.7'
       object.method(method).owner
     end
 
