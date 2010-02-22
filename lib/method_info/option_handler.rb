@@ -2,6 +2,8 @@ require 'method_info/ancestor_method_structure'
 
 module MethodInfo
   class OptionHandler
+    @@custom_default_options = {}
+
     def self.handle(object, options = {})
       processed_options = process_options(options)
       format = processed_options.delete(:format)
@@ -31,8 +33,12 @@ module MethodInfo
       }
     end
 
+    def self.default_options=(options = {})
+      @@custom_default_options = options
+    end
+
     def self.process_options(options = {})
-      defaults = default_profile
+      defaults = default_profile.merge(@@custom_default_options)
       unknown_options = options.keys - defaults.keys
       if unknown_options.empty?
         defaults.merge(options)

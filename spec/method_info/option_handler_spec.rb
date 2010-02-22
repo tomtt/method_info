@@ -98,5 +98,17 @@ module MethodInfo
                              "Unknown value for :format option. Supported values are: nil, :array, :string")
       end
     end
+
+    describe "setting default options" do
+      it "should use a value that is set in the default options" do
+        MethodInfo::OptionHandler.default_options = {
+          :ancestors_to_exclude => [Object]
+        }
+        AncestorMethodStructure.
+          should_receive(:build).
+          with(anything, hash_including(:ancestors_to_exclude => [Object]))
+        MethodInfo::OptionHandler.handle(:foo)
+      end
+    end
   end
 end
