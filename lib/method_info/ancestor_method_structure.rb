@@ -104,7 +104,7 @@ module MethodInfo
     def method_owner(method_symbol)
       method = @object.method(method_symbol)
       method.owner
-    rescue
+    rescue NameError
       poor_mans_method_owner(method, method_symbol.to_s)
     end
 

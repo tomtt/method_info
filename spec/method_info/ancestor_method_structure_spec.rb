@@ -48,6 +48,17 @@ module MethodInfo
           ams.send(:method_owner, :to_i)
         end
 
+        it "raises an error if an error is raised that is not a NameError" do
+          obj = mock('object')
+          mock_method = mock('method', :to_s => 'mock_method_name')
+          obj.stub!(:method).and_return(mock_method)
+          mock_method.stub!(:owner).and_raise ArgumentError
+          ams = AncestorMethodStructure.new(obj,
+                                            :ancestors_to_show => [],
+                                            :ancestors_to_exclude => [])
+          lambda { ams.send(:method_owner, :to_i) }.should raise_error(ArgumentError)
+        end
+
         describe "poor_mans_method_owner" do
           it "finds the owner if it is the base clas" do
             ams = AncestorMethodStructure.new(37, {})
