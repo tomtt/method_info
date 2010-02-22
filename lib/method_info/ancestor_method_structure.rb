@@ -1,3 +1,5 @@
+require 'method_info/ancestor_filter'
+
 module MethodInfo
   class AncestorMethodStructure
     # :ancestors_to_show (default: []) (Overrules the hiding of any ancestors as specified
@@ -17,55 +19,37 @@ module MethodInfo
       methods += object.protected_methods if options[:protected_methods]
       methods += object.private_methods if options[:private_methods]
       methods -= object.singleton_methods unless options[:singleton_methods]
+
       ancestor_method_structure = AncestorMethodStructure.new(object, options)
 
       methods.each do |method|
-        ancestor_method_structure.add_method_to_ancestor(method, method_owner(object, method))
+        ancestor_method_structure.add_method_to_ancestor(method)
       end
       ancestor_method_structure
     end
 
     def initialize(object, options)
+      @object = object
       @options = options
+
       @ancestors = []
-      @excluded_ancestors = []
-      @ancestor_methods = {}
       if options[:singleton_methods]
         begin
           @ancestors << (class << object; self; end)
         rescue TypeError
         end
       end
-      all_ancestors = object.class.ancestors
-      last_class_was_excluded = false
-      all_ancestors.each do |ancestor|
-        if options[:ancestors_to_show].include?(ancestor)
-          @ancestors << ancestor
-          if ancestor.is_a?(Class)
-            last_class_was_excluded = false
-          end
-        elsif options[:ancestors_to_exclude].include?(ancestor)
-          if ancestor.is_a?(Class)
-            last_class_was_excluded = true
-            @excluded_ancestors << ancestor
-          end
-        else
-          if ancestor.is_a?(Class)
-            @ancestors << ancestor
-            last_class_was_excluded = false
-          else
-            if last_class_was_excluded
-              @excluded_ancestors << ancestor
-            else
-              @ancestors << ancestor
-            end
-          end
-        end
-      end
+      @ancestors += object.class.ancestors
+      @ancestor_filter = AncestorFilter.new(@ancestors,
+                                            :include => options[:ancestors_to_show],
+                                            :exclude => options[:ancestors_to_exclude])
+
+      @ancestor_methods = Hash.new
       @ancestors.each { |ancestor| @ancestor_methods[ancestor] = [] }
     end
 
-    def add_method_to_ancestor(method, ancestor)
+    def add_method_to_ancestor(method)
+      ancestor = AncestorMethodStructure.method_owner(@object, method)
       if @ancestors.include?(ancestor)
         @ancestor_methods[ancestor] << method
       end
@@ -79,21 +63,23 @@ module MethodInfo
       s = ancestors_with_methods.map do |ancestor|
         "::: %s :::\n%s\n" % [ancestor.to_s, @ancestor_methods[ancestor].sort.join(', ')]
       end.join('')
-      methodless_ancestors = @ancestors.select { |ancestor| @ancestor_methods[ancestor].empty? }
       if @options[:include_name_of_methodless_ancestors] && ! methodless_ancestors.empty?
         s += "Methodless: " + methodless_ancestors.join(', ') + "\n"
       end
-      if @options[:include_name_of_excluded_ancestors] && ! @excluded_ancestors.empty?
-        s += "Excluded: " + @excluded_ancestors.join(', ') + "\n"
+      if @options[:include_name_of_excluded_ancestors] && ! @ancestor_filter.excluded.empty?
+        s += "Excluded: " + @ancestor_filter.excluded.join(', ') + "\n"
       end
       s
     end
 
     private
 
+    def methodless_ancestors
+      @ancestor_filter.picked.select { |ancestor| @ancestor_methods[ancestor].empty? }
+    end
+
     def ancestors_with_methods
-      @ancestors.
-        select { |ancestor| ! @ancestor_methods[ancestor].empty? }
+      @ancestor_filter.picked.select { |ancestor| ! @ancestor_methods[ancestor].empty? }
     end
 
     # Returns the class or module where method is defined
