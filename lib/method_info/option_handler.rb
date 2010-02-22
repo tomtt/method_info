@@ -38,6 +38,10 @@ module MethodInfo
       @@custom_default_options = options
     end
 
+    def self.default_options
+      @@custom_default_options
+    end
+
     def self.process_options(options = {})
       defaults = default_profile.merge(@@custom_default_options)
       unknown_options = options.keys - defaults.keys

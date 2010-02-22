@@ -101,7 +101,7 @@ module MethodInfo
     end
 
     describe "setting default options" do
-      it "should use a value that is set in the default options" do
+      it "uses a value that is set in the default options" do
         MethodInfo::OptionHandler.default_options = {
           :ancestors_to_exclude => [Object]
         }
@@ -110,6 +110,11 @@ module MethodInfo
           with(anything, hash_including(:ancestors_to_exclude => [Object]))
         MethodInfo::OptionHandler.handle(:foo)
       end
+    end
+
+    it "provides access to it's default options" do
+      MethodInfo::OptionHandler.default_options[:foo] = :bar
+      MethodInfo::OptionHandler.default_options.should == { :foo => :bar }
     end
   end
 end
