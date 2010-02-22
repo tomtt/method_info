@@ -19,6 +19,15 @@ Defines a method_info method on every Object which will show the methods that ea
 * :include_name_of_excluded_ancestors (default: true)
 * :enable_colors (default: false)
 
+You can set default options which will override the inbuild defaults. Here is an example which
+will hide the methods defined on all instances of Object and show colour in the output (this
+requires the ansi-termcolor gem):
+MethodInfo::OptionHandler.default_options = {
+  :ancestors_to_exclude => [Object],
+  :enable_colors => true
+}
+It is suggested that you set these to your liking in your ~/irbrc.
+
 Examples:
 
   >> require 'method_info'
