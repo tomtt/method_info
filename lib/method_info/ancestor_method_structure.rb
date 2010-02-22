@@ -13,6 +13,7 @@ module MethodInfo
     # :private_methods (default: false)
     # :singleton_methods (default: true)
     # :include_name_of_excluded_ancestors (default: true)
+    # :colors (default: false) TODO: configure colours
     def self.build(object, options)
       methods = []
       methods += object.methods if options[:public_methods]
@@ -60,14 +61,31 @@ module MethodInfo
     end
 
     def to_s
+      if @options[:enable_colors]
+        require 'term/ansicolor'
+
+        class_color = Term::ANSIColor.yellow
+        module_color = Term::ANSIColor.red
+        message_color = Term::ANSIColor.green
+        reset_color = Term::ANSIColor.white
+      else
+        class_color = ""
+        module_color = ""
+        message_color = ""
+        reset_color = ""
+      end
+
       s = ancestors_with_methods.map do |ancestor|
-        "::: %s :::\n%s\n" % [ancestor.to_s, @ancestor_methods[ancestor].sort.join(', ')]
+        "%s::: %s :::\n%s%s\n" % [ancestor.is_a?(Class) ? class_color : module_color,
+                                  ancestor.to_s,
+                                  reset_color,
+                                  @ancestor_methods[ancestor].sort.join(', ')]
       end.join('')
       if @options[:include_name_of_methodless_ancestors] && ! methodless_ancestors.empty?
-        s += "Methodless: " + methodless_ancestors.join(', ') + "\n"
+        s += "#{message_color}Methodless:#{reset_color} " + methodless_ancestors.join(', ') + "\n"
       end
       if @options[:include_name_of_excluded_ancestors] && ! @ancestor_filter.excluded.empty?
-        s += "Excluded: " + @ancestor_filter.excluded.join(', ') + "\n"
+        s += "#{message_color}Excluded:#{reset_color} " + @ancestor_filter.excluded.join(', ') + "\n"
       end
       s
     end

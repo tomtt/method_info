@@ -29,7 +29,8 @@ module MethodInfo
         :private_methods => false,
         :protected_methods => false,
         :singleton_methods => true,
-        :public_methods => true
+        :public_methods => true,
+        :enable_colors => false
       }
     end
 

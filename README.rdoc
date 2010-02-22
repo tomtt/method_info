@@ -17,6 +17,7 @@ Defines a method_info method on every Object which will show the methods that ea
 * :private_methods (default: false)
 * :singleton_methods (default: true)
 * :include_name_of_excluded_ancestors (default: true)
+* :enable_colors (default: false)
 
 Examples:
 
