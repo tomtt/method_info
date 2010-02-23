@@ -13,50 +13,60 @@ module MethodInfo
     end
 
     describe "method_owner" do
-      it "gets the method from the object" do
-        obj = Object.new
-        obj.should_receive(:method).with(:to_s).and_return(mock('method', :owner => nil))
+      it "gets the owner of the method and returns it" do
+        ams = AncestorMethodStructure.new(5,
+                                          :ancestors_to_show => [],
+                                          :ancestors_to_exclude => [])
+        ams.send(:method_owner, :ceil).should == Integer
+      end
+
+      it "can still return the owner of the method if the object has redefined :method" do
+        class MethodRedefinedTestClass
+          def method
+            raise "I do not want to call this method"
+          end
+
+          def foo
+            :foo
+          end
+        end
+        obj = MethodRedefinedTestClass.new
+
         ams = AncestorMethodStructure.new(obj,
                                           :ancestors_to_show => [],
                                           :ancestors_to_exclude => [])
-        ams.send(:method_owner, :to_s)
-      end
-
-      describe "for ruby >= 1.8.7" do
-        it "gets the owner of the method and returns it" do
-          obj = mock('object')
-          mock_method = mock('method')
-          obj.stub!(:method).and_return(mock_method)
-          mock_method.should_receive(:owner).and_return :foo
-          ams = AncestorMethodStructure.new(obj,
-                                            :ancestors_to_show => [],
-                                            :ancestors_to_exclude => [])
-          ams.send(:method_owner, :to_s).should == :foo
-        end
+        ams.send(:method_owner, :foo).should == MethodRedefinedTestClass
       end
 
       describe "for ruby 1.8.6" do
         it "should use the poor_mans_method_owner" do
-          obj = mock('object')
           mock_method = mock('method', :to_s => 'mock_method_name')
-          obj.stub!(:method).and_return(mock_method)
+          mock_method.stub!(:bind).and_return mock_method
+          mock_method.stub!(:call).and_return mock_method
+
           mock_method.stub!(:owner).and_raise NameError
-          ams = AncestorMethodStructure.new(obj,
+
+          Object.stub!(:instance_method).with(:method).and_return mock_method
+          ams = AncestorMethodStructure.new(5,
                                             :ancestors_to_show => [],
                                             :ancestors_to_exclude => [])
-          ams.should_receive(:poor_mans_method_owner).with(mock_method, "to_i")
-          ams.send(:method_owner, :to_i)
+          ams.should_receive(:poor_mans_method_owner).with(mock_method, "dup")
+          ams.send(:method_owner, :dup)
         end
 
         it "raises an error if an error is raised that is not a NameError" do
-          obj = mock('object')
           mock_method = mock('method', :to_s => 'mock_method_name')
-          obj.stub!(:method).and_return(mock_method)
-          mock_method.stub!(:owner).and_raise ArgumentError
-          ams = AncestorMethodStructure.new(obj,
+          mock_method.stub!(:bind).and_return mock_method
+          mock_method.stub!(:call).and_return mock_method
+
+          mock_method.stub!(:owner).and_raise StandardError
+
+          Object.stub!(:instance_method).with(:method).and_return mock_method
+          ams = AncestorMethodStructure.new(5,
                                             :ancestors_to_show => [],
                                             :ancestors_to_exclude => [])
-          lambda { ams.send(:method_owner, :to_i) }.should raise_error(ArgumentError)
+
+          lambda { ams.send(:method_owner, :to_i) }.should raise_error(StandardError)
         end
 
         describe "poor_mans_method_owner" do

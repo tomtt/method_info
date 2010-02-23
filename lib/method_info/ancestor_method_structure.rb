@@ -115,7 +115,10 @@ module MethodInfo
 
     # Returns the class or module where method is defined
     def method_owner(method_symbol)
-      method = @object.method(method_symbol)
+      # Under normal circumstances just calling @object.method(method_symbol) would work,
+      # but this will go wrong if the object has redefined the method method.
+      method = Object.instance_method(:method).bind(@object).call(method_symbol)
+
       method.owner
     rescue NameError
       poor_mans_method_owner(method, method_symbol.to_s)
