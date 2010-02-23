@@ -50,6 +50,7 @@ module MethodInfo
           default_options[:protected_methods].should == false
           default_options[:private_methods].should == false
           default_options[:enable_colors].should == false
+          default_options[:suppress_slowness_warning].should == false
         end
       end
 

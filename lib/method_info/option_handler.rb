@@ -30,7 +30,8 @@ module MethodInfo
         :protected_methods => false,
         :singleton_methods => true,
         :public_methods => true,
-        :enable_colors => false
+        :enable_colors => false,
+        :suppress_slowness_warning => false
       }
     end
 

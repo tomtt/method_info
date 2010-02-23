@@ -12,9 +12,20 @@ module MethodInfo
     # :protected_methods (default: false)
     # :private_methods (default: false)
     # :singleton_methods (default: true)
-    # :include_name_of_excluded_ancestors (default: true)
-    # :colors (default: false) TODO: configure colours
+    # :include_names_of_excluded_ancestors (default: true)
+    # :include_names_of_methodless_ancestors (default: true)
+    # :enable_colors (default: false)
+    # :class_color Set colour for a line printing out a class (only used when :enable_colors is true)
+    # :module_color Set colour for a line printing out a module (only used when :enable_colors is true)
+    # :message_color Set colour for a line with a message (only used when :enable_colors is true)
+    # :methods_color Set colour for a line with methods (only used when :enable_colors is true)
+    # :punctuation_color Set colour for punctuation (only used when :enable_colors is true)
+    # :suppress_slowness_warning Does not print out the warning about slowness on older ruby versions (default: false)
     def self.build(object, options)
+      if VERSION < "1.8.7" && !options[:suppress_slowness_warning]
+        STDERR.puts "You are using Ruby #{VERSION}, this may take a while. It will be faster for >=1.8.7."
+      end
+
       methods = []
       methods += object.methods if options[:public_methods]
       methods += object.protected_methods if options[:protected_methods]
