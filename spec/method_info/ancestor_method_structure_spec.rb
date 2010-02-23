@@ -101,6 +101,18 @@ module MethodInfo
             ams = AncestorMethodStructure.new(obj, {})
             ams.send(:poor_mans_method_owner, obj.method(:nest), "nest").should == MethodInfo::TestNestOne::TestNestTwo
           end
+
+          it "finds the owner if it is an anonymous module" do
+            anon = Module.new
+            anon.send(:define_method, :bla) { :bla }
+            class UsingAnonymous
+            end
+            UsingAnonymous.send(:include, anon)
+            obj = UsingAnonymous.new
+
+            ams = AncestorMethodStructure.new(obj, {})
+            ams.send(:poor_mans_method_owner, obj.method(:bla), "bla").should == anon
+          end
         end
       end
     end

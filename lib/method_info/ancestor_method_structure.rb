@@ -34,6 +34,8 @@ module MethodInfo
       @options = options
 
       @ancestors = []
+      @unattributed_methods = []
+
       if options[:singleton_methods]
         begin
           @ancestors << (class << object; self; end)
@@ -53,6 +55,9 @@ module MethodInfo
       ancestor = method_owner(method)
       if @ancestors.include?(ancestor)
         @ancestor_methods[ancestor] << method
+      end
+      unless ancestor
+        @unattributed_methods << method
       end
     end
 
@@ -91,6 +96,9 @@ module MethodInfo
       if @options[:include_names_of_excluded_ancestors] && ! @ancestor_filter.excluded.empty?
         s += "#{message_color}Excluded:#{reset_color} " + @ancestor_filter.excluded.join(', ') + "\n"
       end
+      if @options[:include_names_of_unattributed_methods] && ! @unattributed_methods.empty?
+        s += "#{message_color}Unattributed methods:#{reset_color} " + @unattributed_methods.join(', ') + "\n"
+      end
       s += reset_color
       s
     end
@@ -123,17 +131,24 @@ module MethodInfo
       # 37.method(:prec).to_s => "#<Method: Fixnum(Precision)#prec>"
       # obj.method(:singleton_method).to_s => "#<Method: #<Object:0x5673b8>.singleton_method>"
       # For a nested module: "#<Method: Module1::ClassName(Module1::Module2::Module3)#method>"
-      if method.to_s =~ /^#<Method: (.*)[#.]#{Regexp.escape(method_name)}>$/
-        owner_string = $1
-        # Maybe it is a top level class and we're done
-        if owner_string =~ /[\w:]+\(([:\w]+)\)/
-          # Module or subclass (like 'Fixnum(Integer)')
-          owner_string = $1
-        elsif owner_string.include?("#<Object:")
-          # probably the eigen class
-          owner_string = "#<Class:#{owner_string}>"
+
+      build_ancestor_regexp_map
+      @ancestors.each do |ancestor|
+        return ancestor if method.to_s =~ @ancestor_regexp_map[ancestor]
+      end
+      nil
+    end
+
+    def build_ancestor_regexp_map
+      unless @ancestor_regexp_map
+        @ancestor_regexp_map = Hash.new
+        @ancestors.each do |ancestor|
+          ancestor_name = ancestor.to_s
+          if ancestor_name =~ /^#<Class:(.*)>$/
+            ancestor_name = $1
+          end
+          @ancestor_regexp_map[ancestor] = /#{Regexp.escape(ancestor_name)}[)#.]/
         end
-        @ancestors.select { |a| a.to_s == owner_string }.first
       end
     end
   end
