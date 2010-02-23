@@ -113,8 +113,9 @@ module MethodInfo
     end
 
     it "provides access to it's default options" do
+      MethodInfo::OptionHandler.default_options = { :fruit => :apple }
       MethodInfo::OptionHandler.default_options[:foo] = :bar
-      MethodInfo::OptionHandler.default_options.should == { :foo => :bar }
+      MethodInfo::OptionHandler.default_options.should == { :fruit => :apple, :foo => :bar }
     end
   end
 end
