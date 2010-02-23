@@ -122,10 +122,11 @@ module MethodInfo
       # 37.method(:ceil).to_s => "#<Method: Fixnum(Integer)#ceil>"
       # 37.method(:prec).to_s => "#<Method: Fixnum(Precision)#prec>"
       # obj.method(:singleton_method).to_s => "#<Method: #<Object:0x5673b8>.singleton_method>"
+      # For a nested module: "#<Method: Module1::ClassName(Module1::Module2::Module3)#method>"
       if method.to_s =~ /^#<Method: (.*)[#.]#{Regexp.escape(method_name)}>$/
         owner_string = $1
         # Maybe it is a top level class and we're done
-        if owner_string =~ /\w+\((\w+)\)/
+        if owner_string =~ /[\w:]+\(([:\w]+)\)/
           # Module or subclass (like 'Fixnum(Integer)')
           owner_string = $1
         elsif owner_string.include?("#<Object:")

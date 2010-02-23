@@ -83,6 +83,24 @@ module MethodInfo
             ams = AncestorMethodStructure.new(obj, :singleton_methods => true)
             ams.send(:poor_mans_method_owner, obj.method(:foo), "foo").should == class << obj; self; end
           end
+
+          it "finds the owner if it is nested" do
+            module TestNestOne
+              module TestNestTwo
+                def nest
+                  :nest
+                end
+              end
+            end
+
+            class TestNest
+              include TestNestOne::TestNestTwo
+            end
+            obj = TestNest.new
+
+            ams = AncestorMethodStructure.new(obj, {})
+            ams.send(:poor_mans_method_owner, obj.method(:nest), "nest").should == MethodInfo::TestNestOne::TestNestTwo
+          end
         end
       end
     end
