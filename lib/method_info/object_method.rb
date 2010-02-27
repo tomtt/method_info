@@ -26,6 +26,7 @@ module MethodInfo
     # :message_color Set colour for a line with a message (only used when :enable_colors is true)
     # :methods_color Set colour for a line with methods (only used when :enable_colors is true)
     # :punctuation_color Set colour for punctuation (only used when :enable_colors is true)
+    # :match Shows only those methods that match this option. It's value can be either a string or a regexp (default: nil)
     def method_info(options = {})
       OptionHandler.handle(self, options)
     end

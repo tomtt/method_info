@@ -51,6 +51,7 @@ module MethodInfo
           default_options[:private_methods].should == false
           default_options[:enable_colors].should == false
           default_options[:suppress_slowness_warning].should == false
+          default_options[:match].should == nil
         end
       end
 

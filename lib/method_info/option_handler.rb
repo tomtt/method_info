@@ -31,7 +31,8 @@ module MethodInfo
         :singleton_methods => true,
         :public_methods => true,
         :enable_colors => false,
-        :suppress_slowness_warning => false
+        :suppress_slowness_warning => false,
+        :match => nil
       }
     end
 

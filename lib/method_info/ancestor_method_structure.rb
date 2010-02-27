@@ -21,6 +21,7 @@ module MethodInfo
     # :methods_color Set colour for a line with methods (only used when :enable_colors is true)
     # :punctuation_color Set colour for punctuation (only used when :enable_colors is true)
     # :suppress_slowness_warning Does not print out the warning about slowness on older ruby versions (default: false)
+    # :match Shows only those methods that match this option. It's value can be either a string or a regexp (default: nil)
     def self.build(object, options)
       if VERSION < "1.8.7" && !options[:suppress_slowness_warning]
         STDERR.puts "You are using Ruby #{VERSION}, this may take a while. It will be faster for >=1.8.7."
@@ -33,6 +34,13 @@ module MethodInfo
       methods -= object.singleton_methods unless options[:singleton_methods]
 
       ancestor_method_structure = AncestorMethodStructure.new(object, options)
+
+      if(match = options[:match])
+        unless match.is_a?(Regexp)
+          match = Regexp.new(match)
+        end
+        methods = methods.select { |m| m =~ match }
+      end
 
       methods.each do |method|
         ancestor_method_structure.add_method_to_ancestor(method)
