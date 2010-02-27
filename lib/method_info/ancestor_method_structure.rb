@@ -103,15 +103,23 @@ module MethodInfo
         punctuation_color = ""
       end
 
-      s = ancestors_with_methods.map do |ancestor|
-        "%s::: %s :::\n%s%s\n" % [ancestor.is_a?(Class) ? class_color : module_color,
-                                  ancestor.to_s,
-                                  methods_color,
-                                  @ancestor_methods[ancestor].sort.join("#{punctuation_color}, #{methods_color}")]
-      end.join('')
-      if @options[:include_names_of_methodless_ancestors] && ! methodless_ancestors.empty?
-        s += "#{message_color}Methodless:#{reset_color} " + methodless_ancestors.join(', ') + "\n"
+      ancestors_to_show = @ancestor_filter.picked
+      unless @options[:include_names_of_methodless_ancestors]
+        ancestors_to_show = ancestors_with_methods
       end
+
+      s = ancestors_to_show.map do |ancestor|
+        result = "%s::: %s :::\n" % [ancestor.is_a?(Class) ? class_color : module_color,
+                                     ancestor.to_s]
+        unless @ancestor_methods[ancestor].empty?
+          result += "%s%s\n" % [methods_color,
+                                @ancestor_methods[ancestor].sort.join("#{punctuation_color}, #{methods_color}")]
+        end
+        result
+      end.join('')
+      # if @options[:include_names_of_methodless_ancestors] && ! methodless_ancestors.empty?
+      #   s += "#{message_color}Methodless:#{reset_color} " + methodless_ancestors.join(', ') + "\n"
+      # end
       if @options[:include_names_of_excluded_ancestors] && ! @ancestor_filter.excluded.empty?
         s += "#{message_color}Excluded:#{reset_color} " + @ancestor_filter.excluded.join(', ') + "\n"
       end
