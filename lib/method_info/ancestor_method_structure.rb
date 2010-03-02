@@ -28,24 +28,8 @@ module MethodInfo
         STDERR.puts "You are using a Ruby version (#{VERSION}) that does not support the owner method of a Method - this may take a while. It will be faster for >=1.8.7."
       end
 
-      methods = []
-      methods += object.methods if options[:public_methods]
-      methods += object.protected_methods if options[:protected_methods]
-      methods += object.private_methods if options[:private_methods]
-      methods -= object.singleton_methods unless options[:singleton_methods]
-
       ancestor_method_structure = AncestorMethodStructure.new(object, options)
-
-      if(match = options[:match])
-        unless match.is_a?(Regexp)
-          match = Regexp.new(match)
-        end
-        methods = methods.select { |m| m =~ match }
-      end
-
-      methods.each do |method|
-        ancestor_method_structure.add_method_to_ancestor(method)
-      end
+      ancestor_method_structure.add_selected_methods_to_structure
       ancestor_method_structure
     end
 
@@ -131,7 +115,32 @@ module MethodInfo
       s
     end
 
+    def add_selected_methods_to_structure
+      select_methods
+      apply_match_filter_to_methods
+      @methods.each do |method|
+        add_method_to_ancestor(method)
+      end
+    end
+
     private
+
+    def select_methods
+      @methods = []
+      @methods += @object.methods if @options[:public_methods]
+      @methods += @object.protected_methods if @options[:protected_methods]
+      @methods += @object.private_methods if @options[:private_methods]
+      @methods -= @object.singleton_methods unless @options[:singleton_methods]
+    end
+
+    def apply_match_filter_to_methods
+      if(match = @options[:match])
+        unless match.is_a?(Regexp)
+          match = Regexp.new(match)
+        end
+        @methods = @methods.select { |m| m =~ match }
+      end
+    end
 
     def methodless_ancestors
       @ancestor_filter.picked.select { |ancestor| @ancestor_methods[ancestor].empty? }
