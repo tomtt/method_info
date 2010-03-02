@@ -23,8 +23,9 @@ module MethodInfo
     # :suppress_slowness_warning Does not print out the warning about slowness on older ruby versions (default: false)
     # :match Shows only those methods that match this option. It's value can be either a string or a regexp (default: nil)
     def self.build(object, options)
-      if VERSION < "1.8.7" && !options[:suppress_slowness_warning]
-        STDERR.puts "You are using Ruby #{VERSION}, this may take a while. It will be faster for >=1.8.7."
+      # print warning message if a Method does not support the :owner method
+      if !options[:suppress_slowness_warning] && ! Method.instance_methods.include?("owner")
+        STDERR.puts "You are using a Ruby version (#{VERSION}) that does not support the owner method of a Method - this may take a while. It will be faster for >=1.8.7."
       end
 
       methods = []

@@ -8,7 +8,31 @@ module MethodInfo
     end
 
     describe "AncestorMethodStructure::build" do
-      it "should print the methods on an object" do
+      describe "if a Method does not support the :owner method" do
+        before do
+          Method.stub!(:instance_methods).and_return ["foo"]
+        end
+
+        it "should print a warning message" do
+          STDERR.should_receive :puts
+          AncestorMethodStructure.build(:foo, {})
+        end
+
+        it "should not print a warning message if :suppress_slowness_warning is set" do
+          STDERR.should_not_receive :puts
+          AncestorMethodStructure.build(:foo, :suppress_slowness_warning => true)
+        end
+      end
+
+      describe "if a Method supports the :owner method" do
+        before do
+          Method.stub!(:instance_methods).and_return ["foo", "owner"]
+        end
+
+        it "should not print a warning message" do
+          STDERR.should_not_receive :puts
+          AncestorMethodStructure.build(:foo, {})
+        end
       end
     end
 
