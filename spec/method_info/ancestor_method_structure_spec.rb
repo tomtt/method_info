@@ -26,11 +26,25 @@ module MethodInfo
 
       describe "if a Method supports the :owner method" do
         before do
-          Method.stub!(:instance_methods).and_return ["foo", "owner"]
+          AncestorMethodStructure.send(:class_variable_set,
+                                       '@@ruby_version_supports_owner_method',
+                                       nil)
         end
 
-        it "should not print a warning message" do
+        it "should not print a warning message when instance methods are returned as strings" do
+          Method.stub!(:instance_methods).and_return ["foo", "owner"]
           STDERR.should_not_receive :puts
+          AncestorMethodStructure.build(:foo, {})
+        end
+        it "should not print a warning message when instance methods are returned as symbols" do
+          Method.stub!(:instance_methods).and_return [:foo, :owner]
+          STDERR.should_not_receive :puts
+          AncestorMethodStructure.build(:foo, {})
+        end
+        it "should not check for version more than once" do
+          Method.stub!(:instance_methods).and_return [:foo, :owner]
+          AncestorMethodStructure.build(:foo, {})
+          Method.should_not_receive(:instance_methods)
           AncestorMethodStructure.build(:foo, {})
         end
       end

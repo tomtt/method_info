@@ -22,10 +22,13 @@ module MethodInfo
     # :punctuation_color Set colour for punctuation (only used when :enable_colors is true)
     # :suppress_slowness_warning Does not print out the warning about slowness on older ruby versions (default: false)
     # :match Shows only those methods that match this option. It's value can be either a string or a regexp (default: nil)
+
+    @@ruby_version_supports_owner_method = nil
+
     def self.build(object, options)
       # print warning message if a Method does not support the :owner method
-      if !options[:suppress_slowness_warning] && ! Method.instance_methods.include?("owner")
-        STDERR.puts "You are using a Ruby version (#{VERSION}) that does not support the owner method of a Method - this may take a while. It will be faster for >=1.8.7."
+      if !options[:suppress_slowness_warning] && !ruby_version_supports_owner_method
+        STDERR.puts "You are using a Ruby version (#{RUBY_VERSION}) that does not support the owner method of a Method - this may take a while. It will be faster for >=1.8.7."
       end
 
       ancestor_method_structure = AncestorMethodStructure.new(object, options)
@@ -124,6 +127,12 @@ module MethodInfo
     end
 
     private
+
+    def self.ruby_version_supports_owner_method
+      return @@ruby_version_supports_owner_method unless @@ruby_version_supports_owner_method.nil?
+      @@ruby_version_supports_owner_method =
+        Method.instance_methods.any? { |m| m.to_sym == :owner }
+    end
 
     def select_methods
       @methods = []
