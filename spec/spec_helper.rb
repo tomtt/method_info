@@ -4,7 +4,7 @@ require 'method_info'
 require 'spec'
 require 'spec/autorun'
 
-require 'ruby-debug'
+require 'ruby-debug' if Gem.available?('ruby-debug')
 
 Spec::Runner.configure do |config|
 end
