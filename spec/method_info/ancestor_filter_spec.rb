@@ -50,7 +50,7 @@ module MethodInfo
 
     describe "with class hierarchy" do
       it "excludes the modules of a class that is excluded" do
-        AncestorFilter.new([Fixnum, Integer, Precision, Numeric, Comparable, Object, Kernel],
+        AncestorFilter.new([Fixnum, Integer, Numeric, Comparable, Object, Kernel],
                            :exclude => [Integer, Object]).picked.should ==
           [Fixnum, Numeric, Comparable]
       end

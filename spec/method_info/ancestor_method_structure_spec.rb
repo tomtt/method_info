@@ -110,7 +110,7 @@ module MethodInfo
         describe "poor_mans_method_owner" do
           it "finds the owner if it is the base clas" do
             ams = AncestorMethodStructure.new(37, {})
-            ams.send(:poor_mans_method_owner, 37.method(:rdiv), "rdiv").should == Fixnum
+            ams.send(:poor_mans_method_owner, 37.method(:abs), "abs").should == Fixnum
           end
 
           it "finds the owner if it is a super clas" do
@@ -120,7 +120,7 @@ module MethodInfo
 
           it "finds the owner if it is a module" do
             ams = AncestorMethodStructure.new(37, {})
-            ams.send(:poor_mans_method_owner, 37.method(:prec), "prec").should == Precision
+            ams.send(:poor_mans_method_owner, 37.method(:is_a?), "is_a?").should == Kernel
           end
 
           it "finds the owner if it is the eigenclass" do
@@ -133,6 +133,7 @@ module MethodInfo
           end
 
           it "finds the owner if it is nested" do
+            pending "Spec needs to be fixed to work with 1.9.1" if RUBY_VERSION >= "1.9.1"
             module TestNestOne
               module TestNestTwo
                 def nest

@@ -28,12 +28,12 @@ module MethodInfo
         end
 
         it "uses a value from the default profile if an option was not passed" do
-          MethodInfo::OptionHandler.stub!(:default_profile).and_return({ :mock_option, :mock_value })
+          MethodInfo::OptionHandler.stub!(:default_profile).and_return({ :mock_option => :mock_value })
           AncestorMethodStructure.should_receive(:build).with(anything, hash_including(:mock_option => :mock_value))
           MethodInfo::OptionHandler.handle(:object)
         end
         it "uses a value for an option if it was passed in" do
-          MethodInfo::OptionHandler.stub!(:default_profile).and_return({ :mock_option, :mock_value })
+          MethodInfo::OptionHandler.stub!(:default_profile).and_return({ :mock_option => :mock_value })
           AncestorMethodStructure.should_receive(:build).with(anything, hash_including(:mock_option => :passed_value))
           MethodInfo::OptionHandler.handle(:object, :mock_option => :passed_value)
         end

@@ -6,12 +6,12 @@ module MethodInfo
     describe "method_info" do
       it "passes the object it was called on to the option handler" do
         @obj = Object.new
-        OptionHandler.should_receive(:handle).with(@obj, anything)
+        MethodInfo::OptionHandler.should_receive(:handle).with(@obj, anything)
         @obj.method_info
       end
 
       it "passes its options to the option handler" do
-        OptionHandler.should_receive(:handle).with(anything, { :a => :one, :b => :two })
+        MethodInfo::OptionHandler.should_receive(:handle).with(anything, { :a => :one, :b => :two })
         Object.method_info(:a => :one, :b => :two)
       end
     end
