@@ -68,11 +68,24 @@ Examples:
 * Send me a pull request. Bonus points for topic branches.
 
 == Internal design notes
-* ObjectMethod: is included into the Object class to provide #method_info on every object
-* OptionHandler: deals with all options to #method_info and produces the desired result based on them, calling out to the appropriate classes with their respective options.
-* AncestorMethodStructure: is initialized with an object, determines its ancestors and builds a mapping from each method of the object to the ancestor that owns it.
-* AncestorFilter: is initialized with a list of ancestors and computes which of them are to be shown given certain exclude in include options.
-* Formatter: can produce different types of output from an AncestorMethodStructure.
+
+* ObjectMethod: is included into the Object class to provide
+  #method_info on every object
+* OptionHandler: deals with all options to #method_info and produces
+  the desired result based on them, calling out to the appropriate
+  classes with their respective options.
+* AncestorMethodMapping: given an object, returns a hash with all of
+  the object's methods as keys and their owner as the value
+* AncestorMethodStructure: given an AncestorMethodMapping, transforms
+  is into a data structure that has a list of elements for which the
+  first element is an ancestor and the second element the methods
+  defined by the ancestor. The elements are ordered by the hierarchy
+  of ancestors of the object of the mapping.
+* AncestorFilter: is initialized with a list of ancestors and computes
+  which of them are to be shown given certain exclude in include
+  options.
+* Formatter: can produce different types of output from an
+  AncestorMethodStructure.
 
 == Copyright
 
