@@ -1,13 +1,13 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
-require 'method_info/ancestor_method_structure'
+require 'method_info/formatter'
 
 module MethodInfo
-  describe AncestorMethodStructure do
+  describe Formatter do
     describe "class" do
       it "should have specs"
     end
 
-    describe "AncestorMethodStructure::build" do
+    describe "Formatter::build" do
       describe "if a Method does not support the :owner method" do
         before do
           Method.stub!(:instance_methods).and_return ["foo"]
@@ -15,18 +15,18 @@ module MethodInfo
 
         it "should print a warning message" do
           STDERR.should_receive :puts
-          AncestorMethodStructure.build(:foo, {})
+          Formatter.build(:foo, {})
         end
 
         it "should not print a warning message if :suppress_slowness_warning is set" do
           STDERR.should_not_receive :puts
-          AncestorMethodStructure.build(:foo, :suppress_slowness_warning => true)
+          Formatter.build(:foo, :suppress_slowness_warning => true)
         end
       end
 
       describe "if a Method supports the :owner method" do
         before do
-          AncestorMethodStructure.send(:class_variable_set,
+          Formatter.send(:class_variable_set,
                                        '@@ruby_version_supports_owner_method',
                                        nil)
         end
@@ -34,25 +34,25 @@ module MethodInfo
         it "should not print a warning message when instance methods are returned as strings" do
           Method.stub!(:instance_methods).and_return ["foo", "owner"]
           STDERR.should_not_receive :puts
-          AncestorMethodStructure.build(:foo, {})
+          Formatter.build(:foo, {})
         end
         it "should not print a warning message when instance methods are returned as symbols" do
           Method.stub!(:instance_methods).and_return [:foo, :owner]
           STDERR.should_not_receive :puts
-          AncestorMethodStructure.build(:foo, {})
+          Formatter.build(:foo, {})
         end
         it "should not check for version more than once" do
           Method.stub!(:instance_methods).and_return [:foo, :owner]
-          AncestorMethodStructure.build(:foo, {})
+          Formatter.build(:foo, {})
           Method.should_not_receive(:instance_methods)
-          AncestorMethodStructure.build(:foo, {})
+          Formatter.build(:foo, {})
         end
       end
     end
 
     describe "method_owner" do
       it "gets the owner of the method and returns it" do
-        ams = AncestorMethodStructure.new(5,
+        ams = Formatter.new(5,
                                           :ancestors_to_show => [],
                                           :ancestors_to_exclude => [])
         ams.send(:method_owner, :ceil).should == Integer
@@ -70,7 +70,7 @@ module MethodInfo
         end
         obj = MethodRedefinedTestClass.new
 
-        ams = AncestorMethodStructure.new(obj,
+        ams = Formatter.new(obj,
                                           :ancestors_to_show => [],
                                           :ancestors_to_exclude => [])
         ams.send(:method_owner, :foo).should == MethodRedefinedTestClass
@@ -85,7 +85,7 @@ module MethodInfo
           mock_method.stub!(:owner).and_raise NameError
 
           Object.stub!(:instance_method).with(:method).and_return mock_method
-          ams = AncestorMethodStructure.new(5,
+          ams = Formatter.new(5,
                                             :ancestors_to_show => [],
                                             :ancestors_to_exclude => [])
           ams.should_receive(:poor_mans_method_owner).with(mock_method, "dup")
@@ -100,7 +100,7 @@ module MethodInfo
           mock_method.stub!(:owner).and_raise StandardError
 
           Object.stub!(:instance_method).with(:method).and_return mock_method
-          ams = AncestorMethodStructure.new(5,
+          ams = Formatter.new(5,
                                             :ancestors_to_show => [],
                                             :ancestors_to_exclude => [])
 
@@ -109,17 +109,17 @@ module MethodInfo
 
         describe "poor_mans_method_owner" do
           it "finds the owner if it is the base clas" do
-            ams = AncestorMethodStructure.new(37, {})
+            ams = Formatter.new(37, {})
             ams.send(:poor_mans_method_owner, 37.method(:abs), "abs").should == Fixnum
           end
 
           it "finds the owner if it is a super clas" do
-            ams = AncestorMethodStructure.new(37, {})
+            ams = Formatter.new(37, {})
             ams.send(:poor_mans_method_owner, 37.method(:ceil), "ceil").should == Integer
           end
 
           it "finds the owner if it is a module" do
-            ams = AncestorMethodStructure.new(37, {})
+            ams = Formatter.new(37, {})
             ams.send(:poor_mans_method_owner, 37.method(:is_a?), "is_a?").should == Kernel
           end
 
@@ -128,7 +128,7 @@ module MethodInfo
             def obj.foo
               :foo
             end
-            ams = AncestorMethodStructure.new(obj, :singleton_methods => true)
+            ams = Formatter.new(obj, :singleton_methods => true)
             ams.send(:poor_mans_method_owner, obj.method(:foo), "foo").should == class << obj; self; end
           end
 
@@ -147,7 +147,7 @@ module MethodInfo
             end
             obj = TestNest.new
 
-            ams = AncestorMethodStructure.new(obj, {})
+            ams = Formatter.new(obj, {})
             ams.send(:poor_mans_method_owner, obj.method(:nest), "nest").should == MethodInfo::TestNestOne::TestNestTwo
           end
 
@@ -159,7 +159,7 @@ module MethodInfo
             UsingAnonymous.send(:include, anon)
             obj = UsingAnonymous.new
 
-            ams = AncestorMethodStructure.new(obj, {})
+            ams = Formatter.new(obj, {})
             ams.send(:poor_mans_method_owner, obj.method(:bla), "bla").should == anon
           end
         end

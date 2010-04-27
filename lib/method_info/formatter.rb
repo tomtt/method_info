@@ -1,7 +1,13 @@
 require 'method_info/ancestor_filter'
 
 module MethodInfo
-  class AncestorMethodStructure
+  # Currently a copy of the AncestorMethodStructure class that is
+  # about to undergo massive refactoring. For now this class will do
+  # everything that AncestorMethodStructure was doing before.
+  #
+  # When refactoring is completed, this should be an accurate description of the class:
+  # Can produce different types of output from an Formatter.
+  class Formatter
     # :ancestors_to_show (default: []) (Overrules the hiding of any ancestors as specified
     #                    by the :ancestors_to_exclude option)
     # :ancestors_to_exclude (default: []) (If a class is excluded, all modules included
@@ -31,7 +37,7 @@ module MethodInfo
         STDERR.puts "You are using a Ruby version (#{RUBY_VERSION}) that does not support the owner method of a Method - this may take a while. It will be faster for >=1.8.7."
       end
 
-      ancestor_method_structure = AncestorMethodStructure.new(object, options)
+      ancestor_method_structure = Formatter.new(object, options)
       ancestor_method_structure.add_selected_methods_to_structure
       ancestor_method_structure
     end

@@ -67,6 +67,13 @@ Examples:
   (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
 * Send me a pull request. Bonus points for topic branches.
 
+== Internal design notes
+* ObjectMethod: is included into the Object class to provide #method_info on every object
+* OptionHandler: deals with all options to #method_info and produces the desired result based on them, calling out to the appropriate classes with their respective options.
+* AncestorMethodStructure: is initialized with an object, determines its ancestors and builds a mapping from each method of the object to the ancestor that owns it.
+* AncestorFilter: is initialized with a list of ancestors and computes which of them are to be shown given certain exclude in include options.
+* Formatter: can produce different types of output from an AncestorMethodStructure.
+
 == Copyright
 
 Copyright (c) 2010 Tom ten Thij. See LICENSE for details.
