@@ -4,16 +4,19 @@ module MethodInfo
   class AncestorMethodMapping < Hash
     def initialize(object)
       @object = object
-      build_mapping
+      find_owner_for_each_method
       build_ancestor_hierarchy
     end
+
+    attr_reader :ancestors
 
     private
 
     def build_ancestor_hierarchy
+      @ancestors = [class << @object;self;end] + @object.class.ancestors
     end
 
-    def build_mapping
+    def find_owner_for_each_method
       @object.methods.each do |method|
         self[method.to_sym] = method_owner(method)
       end
