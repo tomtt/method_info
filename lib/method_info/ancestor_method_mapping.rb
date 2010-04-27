@@ -13,7 +13,11 @@ module MethodInfo
     private
 
     def build_ancestor_hierarchy
-      @ancestors = [class << @object;self;end] + @object.class.ancestors
+      @ancestors = @object.class.ancestors
+      @eigenclass = class << @object;self;end
+      unless @ancestors.include?(@eigenclass)
+        @ancestors = [@eigenclass] + @ancestors
+      end
     end
 
     def find_owner_for_each_method

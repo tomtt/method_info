@@ -84,5 +84,14 @@ module MethodInfo
           subject.ancestors.index(HierarchyTop)
       end
     end
+
+    context "when finding the ancestor hierarchy of nil" do
+      subject { AncestorMethodMapping.new(@object) }
+
+      it "should not have any duplicates" do
+        # nil's class and eigenclass are both NilClass
+        subject.ancestors.should == subject.ancestors.uniq
+      end
+    end
   end
 end
