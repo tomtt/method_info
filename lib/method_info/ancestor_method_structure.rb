@@ -1,34 +1,52 @@
 module MethodInfo
-  # Given an object, a subset of its methods and a subset of it's
-  # ancestors, this class produces information about which of those
-  # methods is owned by which of the object's ancestors.
+  # Gets initialized with an AncestorMethodMapping instance and uses the information it provides
+  # to build a structure that can be used to easily generate every type of output.
   #
-  # The basic information we need is a mapping from each method to the
-  # first ancestor in the hierarchy that defines it. If no ancestor
-  # defines the method it should map to nil.
+  # The mappings provides an ordered list of ancestors and a mapping
+  # for each method to its owner, which is typically a member of the
+  # ancestors list.
   #
-  # The external representation of this information is an array with
-  # an element for each ancestor with the ancestor itself as the first
-  # element and a list of methods that it defines as the second
-  # element.
+  # The structure this is translated to looks like this:
+  # [
+  #   [Ancestor0, [:method0, :method1]],
+  #   [Ancestor1, [:method2]],
+  #   [nil, [:method_x]]
+  # ]
+  # Notes:
+  # * The order of the elements in the array is the same as the order of the ancestors list
+  # * The order of the methods is alphabetized by the string representation of the symbols
+  # * Any method that does not have an owner or that has an owner that is not in the
+  #   ancestors list will end up in the list with the nil ancestor
   class AncestorMethodStructure
-    def initialize(object)
-      @object = object
-      @structure = nil
+    def initialize(ancestor_method_mapping)
+      @ancestor_method_mapping = ancestor_method_mapping
+      build_structure
     end
 
-    def structure
-      build_structure
-      @structure
-    end
+    attr_reader :structure
 
     private
 
     def build_structure
-      @structure = Hash.new { |hash, key| hash[key] = [] }
-      @object.methods.each do |method|
-        @structure[@object.method(method).owner] << method.to_sym
+      methods_by_owner = Hash.new { |hash, key| hash[key] = [] }
+      ancestors = @ancestor_method_mapping.ancestors
+      @ancestor_method_mapping.keys.each do |method|
+        ancestor = @ancestor_method_mapping[method]
+        unless ancestors.include?(ancestor)
+          ancestor = nil
+        end
+        methods_by_owner[ancestor] << method
       end
+      if methods_by_owner.has_key?(nil)
+        ancestors << nil
+      end
+      @structure = ancestors.map do |ancestor|
+        [ancestor, AncestorMethodStructure.alphabetize(methods_by_owner[ancestor])]
+      end
+    end
+
+    def self.alphabetize(list_of_symbols)
+      list_of_symbols.map { |s| s.to_s }.sort.map { |s| s.to_sym }
     end
   end
 end
