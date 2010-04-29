@@ -86,6 +86,8 @@ Examples:
   options.
 * Formatter: can produce different types of output from an
   AncestorMethodStructure.
+* WarnForOldRubyVersion: check if ruby version supports required
+  method and prints a warning message if not
 
 == Copyright
 
