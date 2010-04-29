@@ -7,15 +7,15 @@ module MethodInfo
     def self.handle(object, options = {})
       processed_options = process_options(options)
       format = processed_options.delete(:format)
-      ancestor_method_structure = Formatter.build(object, processed_options)
+      formatter = Formatter.build(object, processed_options)
       if format == :string
-        ancestor_method_structure.to_s
+        formatter.to_s
       elsif format == :array
-        ancestor_method_structure.to_a
+        formatter.to_a
       elsif format
         raise(ArgumentError.new("Unknown value for :format option. Supported values are: nil, :array, :string"))
       else
-        puts ancestor_method_structure
+        puts formatter
       end
     end
 
