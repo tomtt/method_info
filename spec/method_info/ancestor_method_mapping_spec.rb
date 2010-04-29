@@ -5,15 +5,31 @@ class HierarchyTop
   def apes; end
   def bears; end
   def cats; end
+
+  protected
+
+  def polarbears; end
 end
 
 class HierarchyMedium < HierarchyTop
   def apes; end
   def bears; end
+
+  private
+
+  def penguins; end
+
+  protected
+
+  def polarbears; end
 end
 
 class HierarchyLow < HierarchyMedium
   def apes; end
+
+  private
+
+  def penguins; end
 end
 
 module MethodInfo
@@ -33,6 +49,14 @@ module MethodInfo
 
         it "should have the HierarchyTop class as the owner of a method that it first defines" do
           subject[:cats].should == HierarchyTop
+        end
+
+        it "should have the HierarchyLow class as the owner of a private method that it first defines" do
+          subject[:penguins].should == HierarchyLow
+        end
+
+        it "should have the HierarchyMedium class as the owner of a protected method that it first defines" do
+          subject[:polarbears].should == HierarchyMedium
         end
       end
 
