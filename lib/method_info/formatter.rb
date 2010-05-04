@@ -1,81 +1,21 @@
 require 'method_info/ancestor_filter'
+require 'method_info/ancestor_method_mapping'
+require 'method_info/ancestor_method_structure'
+require 'method_info/warn_for_old_ruby_version'
 
 module MethodInfo
-  # Currently a copy of the AncestorMethodStructure class that is
-  # about to undergo massive refactoring. For now this class will do
-  # everything that AncestorMethodStructure was doing before.
-  #
-  # When refactoring is completed, this should be an accurate description of the class:
-  # Can produce different types of output from an Formatter.
+  # Can produce different formats to represent an AncestorMethodStructure
   class Formatter
-    # :ancestors_to_show (default: []) (Overrules the hiding of any ancestors as specified
-    #                    by the :ancestors_to_exclude option)
-    # :ancestors_to_exclude (default: []) (If a class is excluded, all modules included
-    #                       under it are excluded as well, an ancestor specified in
-    #                       :ancestors_to_show will be shown regardless of the this value)
-    # :method_missing (default: false)
-    # :public_methods (default: true)
-    # :protected_methods (default: false)
-    # :private_methods (default: false)
-    # :singleton_methods (default: true)
-    # :include_names_of_excluded_ancestors (default: true)
-    # :include_names_of_methodless_ancestors (default: true)
-    # :enable_colors (default: false)
-    # :class_color Set colour for a line printing out a class (only used when :enable_colors is true)
-    # :module_color Set colour for a line printing out a module (only used when :enable_colors is true)
-    # :message_color Set colour for a line with a message (only used when :enable_colors is true)
-    # :methods_color Set colour for a line with methods (only used when :enable_colors is true)
-    # :punctuation_color Set colour for punctuation (only used when :enable_colors is true)
-    # :suppress_slowness_warning Does not print out the warning about slowness on older ruby versions (default: false)
-    # :match Shows only those methods that match this option. It's value can be either a string or a regexp (default: nil)
-
-    @@ruby_version_supports_owner_method = nil
-
     def self.build(object, options)
-      # print warning message if a Method does not support the :owner method
-      if !options[:suppress_slowness_warning] && !ruby_version_supports_owner_method
-        STDERR.puts "You are using a Ruby version (#{RUBY_VERSION}) that does not support the owner method of a Method - this may take a while. It will be faster for >=1.8.7."
+      if !options[:suppress_slowness_warning]
+        WarnForOldRubyVersion.warn_if_method_owner_not_supported
       end
 
-      ancestor_method_structure = Formatter.new(object, options)
-      ancestor_method_structure.add_selected_methods_to_structure
-      ancestor_method_structure
-    end
-
-    def initialize(object, options)
-      @object = object
-      @options = options
-
-      @ancestors = []
-      @unattributed_methods = []
-
-      if options[:singleton_methods]
-        begin
-          @ancestors << (class << object; self; end)
-        rescue TypeError
-        end
-      end
-      @ancestors += object.class.ancestors
-      @ancestor_filter = AncestorFilter.new(@ancestors,
-                                            :include => options[:ancestors_to_show],
-                                            :exclude => options[:ancestors_to_exclude])
-
-      @ancestor_methods = Hash.new
-      @ancestors.each { |ancestor| @ancestor_methods[ancestor] = [] }
-    end
-
-    def add_method_to_ancestor(method)
-      ancestor = method_owner(method)
-      if @ancestors.include?(ancestor)
-        @ancestor_methods[ancestor] << method
-      end
-      unless ancestor
-        @unattributed_methods << method
-      end
+      Formatter.new(object, options)
     end
 
     def to_a
-      ancestors_with_methods.map { |ancestor| [ancestor, @ancestor_methods[ancestor].sort] }
+      @ancestor_method_structure.structure
     end
 
     def to_s
@@ -134,10 +74,16 @@ module MethodInfo
 
     private
 
-    def self.ruby_version_supports_owner_method
-      return @@ruby_version_supports_owner_method unless @@ruby_version_supports_owner_method.nil?
-      @@ruby_version_supports_owner_method =
-        Method.instance_methods.any? { |m| m.to_sym == :owner }
+    def initialize(object, options)
+      @object = object
+      @options = options
+      @ancestor_method_mapping = AncestorMethodMapping.new(object)
+      select_methods
+      apply_match_filter_to_methods
+      @ancestor_method_structure = AncestorMethodStructure.new(@ancestor_method_mapping, @methods)
+      @ancestor_filter = AncestorFilter.new(@ancestor_method_mapping.ancestors,
+                                            :include => options[:ancestors_to_show],
+                                            :exclude => options[:ancestors_to_exclude])
     end
 
     def select_methods
@@ -163,48 +109,6 @@ module MethodInfo
 
     def ancestors_with_methods
       @ancestor_filter.picked.select { |ancestor| ! @ancestor_methods[ancestor].empty? }
-    end
-
-    # Returns the class or module where method is defined
-    def method_owner(method_symbol)
-      # Under normal circumstances just calling @object.method(method_symbol) would work,
-      # but this will go wrong if the object has redefined the method method.
-      method = Object.instance_method(:method).bind(@object).call(method_symbol)
-
-      method.owner
-    rescue NameError
-      poor_mans_method_owner(method, method_symbol.to_s)
-    end
-
-    # Ruby 1.8.6 has no Method#owner method, this is a poor man's replacement. It has horrible
-    # performance and may break for other ruby implementations than MRI.
-    def poor_mans_method_owner(method, method_name)
-      # A Method object has no :owner method, but we can infer it's owner from the result of it's
-      # :to_s method. Examples:
-      # 37.method(:rdiv).to_s => "#<Method: Fixnum#rdiv>"
-      # 37.method(:ceil).to_s => "#<Method: Fixnum(Integer)#ceil>"
-      # 37.method(:prec).to_s => "#<Method: Fixnum(Precision)#prec>"
-      # obj.method(:singleton_method).to_s => "#<Method: #<Object:0x5673b8>.singleton_method>"
-      # For a nested module: "#<Method: Module1::ClassName(Module1::Module2::Module3)#method>"
-
-      build_ancestor_regexp_map
-      @ancestors.each do |ancestor|
-        return ancestor if method.to_s =~ @ancestor_regexp_map[ancestor]
-      end
-      nil
-    end
-
-    def build_ancestor_regexp_map
-      unless @ancestor_regexp_map
-        @ancestor_regexp_map = Hash.new
-        @ancestors.each do |ancestor|
-          ancestor_name = ancestor.to_s
-          if ancestor_name =~ /^#<Class:(.*)>$/
-            ancestor_name = $1
-          end
-          @ancestor_regexp_map[ancestor] = /#{Regexp.escape(ancestor_name)}[)#.]/
-        end
-      end
     end
   end
 end
