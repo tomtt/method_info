@@ -1,5 +1,5 @@
 module MethodInfo
-  # Gets initialized with an AncestorMethodMapping instance and uses the information it provides
+  # Gets initialized with an AncestorMethodMapping instance and uses the information that provides
   # to build a structure that can be used to easily generate every type of output.
   #
   # The mappings provides an ordered list of ancestors and a mapping
@@ -8,9 +8,9 @@ module MethodInfo
   #
   # The structure this is translated to looks like this:
   # [
-  #   [Ancestor0, [:method0, :method1]],
-  #   [Ancestor1, [:method2]],
-  #   [nil, [:method_x]]
+  #   [Ancestor0, ["method0", "method1"]],
+  #   [Ancestor1, ["method2"]],
+  #   [nil, ["method_x"]]
   # ]
   # Notes:
   # * The order of the elements in the array is the same as the order of the ancestors list
@@ -32,7 +32,7 @@ module MethodInfo
       methods_by_owner = Hash.new { |hash, key| hash[key] = [] }
       ancestors = @ancestor_method_mapping.ancestors
       @methods.each do |method|
-        ancestor = @ancestor_method_mapping[method]
+        ancestor = @ancestor_method_mapping[method.to_sym]
         unless ancestors.include?(ancestor)
           ancestor = nil
         end

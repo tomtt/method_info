@@ -54,7 +54,7 @@ module MethodInfo
         end
       end
 
-      context "with methods passed" do
+      context "with methods passed as symbols" do
         it "transforms an object that behaves like an AncestorMethodMapping into the desired structure, using only the methods specified" do
           amm = {
             :ape => Kernel,
@@ -66,6 +66,25 @@ module MethodInfo
           }
           amm.stub!(:ancestors).and_return [String, Object, Kernel]
           AncestorMethodStructure.new(amm, [:ape, :cat, :flamingo]).structure.should ==
+            [[String, []],
+             [Object, [:flamingo]],
+             [Kernel, [:ape, :cat]]
+            ]
+        end
+      end
+
+      context "with methods passed as string" do
+        it "transforms an object that behaves like an AncestorMethodMapping into the desired structure, using only the methods specified" do
+          amm = {
+            :ape => Kernel,
+            :bear => Object,
+            :cat => Kernel,
+            :dog => String,
+            :elk => Kernel,
+            :flamingo => Object
+          }
+          amm.stub!(:ancestors).and_return [String, Object, Kernel]
+          AncestorMethodStructure.new(amm, ["ape", "cat", "flamingo"]).structure.should ==
             [[String, []],
              [Object, [:flamingo]],
              [Kernel, [:ape, :cat]]
