@@ -5,25 +5,10 @@ Feature: Generating string representation of methods on an object
   As a developer
   I want to see a list of methods grouped by the ancestor that defines them
 
-  Background:
-    Given an object "object" of class "CukeObject"
-    And the ancestor hierarchy of object "object" is as follows:
-    | CukeObject |
-    | Object |
-    | Kernel |
-    And the object "object" has the following methods:
-    | method | ancestor   |
-    | foo    | CukeObject |
-    | bar    | CukeObject |
-    | baz    | Kernel     |
-
-  Scenario: Default string representation
-    When I call method info for object "object"
-    Then the output should be:
+  Scenario: default method info for an integer
+    Given I am using rvm "ruby-1.8.7-p249@bare"
+    When I run "5.method_info" in ruby with method_info required
+    Then I should see:
     """
-::: CukeObject :::
-bar, foo
-::: Object :::
-::: Kernel :::
-baz
+boo
     """
