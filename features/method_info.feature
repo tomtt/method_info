@@ -21,7 +21,6 @@ prec, prec_f, prec_i
 ::: Comparable :::
 between?
 ::: Object :::
-
 ::: MethodInfo::ObjectMethod :::
 method_info
 ::: Kernel :::

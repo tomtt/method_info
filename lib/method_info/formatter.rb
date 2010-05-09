@@ -19,7 +19,9 @@ module MethodInfo
 
     def ancestor_with_methods_to_s(ancestor_with_methods)
       (ancestor, methods) = ancestor_with_methods
-      "::: %s :::\n" % ancestor + methods.join(", ") + "\n"
+      s = "::: %s :::\n" % ancestor
+      s += methods.join(", ") + "\n" unless methods.empty?
+      s
     end
 
     def initialize(object, options)
