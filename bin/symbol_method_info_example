@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+lib_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib'))
+$:.unshift(lib_dir) unless
+  $:.include?(lib_dir) || $:.include?(File.expand_path(lib_dir))
+
+require 'method_info'
+puts :bla.method_info
