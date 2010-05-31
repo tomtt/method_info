@@ -1,5 +1,3 @@
-@wip
-
 Feature: Generating string representation of methods on an object
   In order to find out what methods are defined on an object
   As a developer
